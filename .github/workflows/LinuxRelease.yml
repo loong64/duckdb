@@ -1,0 +1,65 @@
+
+name: build(duckdb)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        default: 'latest'
+        description: 'Package version'
+        type: string
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  app_name: 'duckdb'
+  app_repo: 'duckdb/duckdb'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Version
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.version }}" = "latest" ]; then
+            app_version=$(curl -s "https://api.github.com/repos/${{ env.app_repo }}/releases/latest" | jq -r .tag_name)
+          else
+            app_version=${{ github.event.inputs.version }}
+          fi
+          if [ -z "${app_version}" ] || [ "${app_version}" == "null" ]; then
+            echo "Failed to get version"
+            exit 1
+          fi
+          
+          echo "app_version=${app_version}" >> $GITHUB_ENV
+          echo ""
+          echo "========== Build Args =========="
+          echo "app_version=${app_version}"
+
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ env.app_repo }}
+          ref: ${{ env.app_version }}
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          platforms: linux/loong64
+          push: true
+          build-args: |
+            RUNNER_ARCH
+            VERSION=${{ env.app_version }}
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ env.app_version }}
+          outputs: type=image,oci-mediatypes=true,compression=zstd,compression-level=3,force-compression=true
+          cache-from: ghcr.io/${{ github.repository }}:${{ env.app_version }}
