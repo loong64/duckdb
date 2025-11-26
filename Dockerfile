@@ -28,6 +28,7 @@ ARG FORCE_WARN_UNUSED=1
 ARG EXPORT_DYNAMIC_SYMBOLS=1
 
 RUN set -ex && \
+    export DUCKDB_PLATFORM=linux_${TARGETARCH} && \
     make && \
     ./build/release/duckdb -c "PRAGMA platform;"
 
@@ -59,6 +60,7 @@ ARG FORCE_WARN_UNUSED=1
 ARG EXPORT_DYNAMIC_SYMBOLS=1
 
 RUN set -ex && \
+    export DUCKDB_PLATFORM=linux_${TARGETARCH} && \
     make gather-libs && \
     ./build/release/duckdb -c "PRAGMA platform;"
 
