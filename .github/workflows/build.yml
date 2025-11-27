@@ -75,6 +75,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Create release
+        if: env.app_build == '1'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
