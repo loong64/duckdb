@@ -1,0 +1,26 @@
+diff --git a/extension/icu/third_party/icu/i18n/double-conversion-utils.h b/extension/icu/third_party/icu/i18n/double-conversion-utils.h
+index 0992984..d08a355 100644
+--- a/extension/icu/third_party/icu/i18n/double-conversion-utils.h
++++ b/extension/icu/third_party/icu/i18n/double-conversion-utils.h
+@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
+ #if defined(_M_X64) || defined(__x86_64__) || \
+     defined(__ARMEL__) || defined(__avr32__) || defined(_M_ARM) || defined(_M_ARM64) || \
+     defined(__hppa__) || defined(__ia64__) || \
+-    defined(__mips__) || \
++    defined(__mips__) || defined(__loongarch64) || \
+     defined(__powerpc__) || defined(__ppc__) || defined(__ppc64__) || \
+     defined(_POWER) || defined(_ARCH_PPC) || defined(_ARCH_PPC64) || \
+     defined(__sparc__) || defined(__sparc) || defined(__s390__) || \
+diff --git a/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h b/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h
+index fca2168..bf3bfc6 100644
+--- a/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h
++++ b/extension/jemalloc/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h
+@@ -259,6 +259,8 @@
+ #define LG_PAGE 12 // x86 and x86_64 typically have a 4KB page size
+ #elif defined(__powerpc__) || defined(__ppc__)
+ #define LG_PAGE 16 // PowerPC architectures often use 64KB page size
++#elif defined(__loongarch64)
++#define LG_PAGE 14
+ #elif defined(__sparc__)
+ #define LG_PAGE 13 // SPARC architectures usually have an 8KB page size
+ #elif defined(__aarch64__) || defined(__ARM_ARCH)

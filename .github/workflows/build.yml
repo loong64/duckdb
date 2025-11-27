@@ -71,6 +71,8 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ env.app_version }}
           outputs: type=local,dest=./
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Create release
         env:

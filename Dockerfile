@@ -1,20 +1,23 @@
 FROM ghcr.io/loong64/manylinux_2_38_loongarch64 AS builder
 
 RUN set -ex && \
-    yum install -y perl-IPC-Cmd gcc-c++ && \
+    yum install -y ccache perl-IPC-Cmd gcc-c++ && \
     yum clean all
 
 ARG RUNNER_ARCH
 RUN set -ex && \
     curl -sSL https://github.com/loong64/static-clang-build/raw/refs/heads/main/manylinux-install-static-clang.sh | bash
 
+WORKDIR /opt/duckdb
+
 ARG VERSION
 RUN set -ex && \
     git clone --depth=1 -b ${VERSION} https://github.com/duckdb/duckdb /opt/duckdb && \
-    sed -i 's@defined(__mips__) ||@defined(__mips__) || defined(__loongarch64) ||@g' /opt/duckdb/extension/icu/third_party/icu/i18n/double-conversion-utils.h
+    curl -sSL https://github.com/loong64/duckdb/raw/refs/heads/main/patch_loong64.patch | git apply
 
-ENV PATH=/opt/clang/bin:$PATH
-WORKDIR /opt/duckdb
+ENV CC="/opt/clang/bin/clang"
+ENV CXX="/opt/clang/bin/clang++"
+ENV LDFLAGS="-fuse-ld=lld"
 
 FROM builder AS build-linux-release
 ARG TARGETARCH
@@ -27,7 +30,8 @@ ARG BUILD_BENCHMARK=1
 ARG FORCE_WARN_UNUSED=1
 ARG EXPORT_DYNAMIC_SYMBOLS=1
 
-RUN set -ex && \
+RUN --mount=type=cache,target=/root/.cache \
+    set -ex && \
     export DUCKDB_PLATFORM=linux_${TARGETARCH} && \
     make && \
     ./build/release/duckdb -c "PRAGMA platform;"
@@ -59,7 +63,8 @@ ARG BUILD_BENCHMARK=1
 ARG FORCE_WARN_UNUSED=1
 ARG EXPORT_DYNAMIC_SYMBOLS=1
 
-RUN set -ex && \
+RUN --mount=type=cache,target=/root/.cache \
+    set -ex && \
     export DUCKDB_PLATFORM=linux_${TARGETARCH} && \
     make gather-libs && \
     ./build/release/duckdb -c "PRAGMA platform;"
