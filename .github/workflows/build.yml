@@ -9,6 +9,8 @@ on:
         description: 'Package version'
         type: string
         required: true
+  schedule:
+    - cron: '0 20 * * *'
 
 permissions:
   contents: write
