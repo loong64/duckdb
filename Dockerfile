@@ -1,7 +1,7 @@
 FROM ghcr.io/loong64/manylinux_2_38_loongarch64 AS builder
 
 RUN set -ex && \
-    yum install -y ccache perl-IPC-Cmd gcc-c++ && \
+    yum install -y ccache perl-IPC-Cmd gcc-c++ zip && \
     yum clean all
 
 ARG RUNNER_ARCH
